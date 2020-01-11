@@ -136,17 +136,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
             debug('Using provided (custom) puppteer object.');
         }
 
-        if (this.options.concurrency === Cluster.CONCURRENCY_PAGE) {
-            this.browser = new builtInConcurrency.Page(browserOptions, puppeteer);
-        } else if (this.options.concurrency === Cluster.CONCURRENCY_CONTEXT) {
-            this.browser = new builtInConcurrency.Context(browserOptions, puppeteer);
-        } else if (this.options.concurrency === Cluster.CONCURRENCY_BROWSER) {
-            this.browser = new builtInConcurrency.Browser(browserOptions, puppeteer);
-        } else if (typeof this.options.concurrency === 'function') {
-            this.browser = new this.options.concurrency(browserOptions, puppeteer);
-        } else {
-            throw new Error(`Unknown concurrency option: ${this.options.concurrency}`);
-        }
+        this.browser = new builtInConcurrency.Page(browserOptions, puppeteer);
 
         try {
             await this.browser.init();

@@ -5,7 +5,7 @@ import ConcurrencyImplementation, { ResourceData } from './ConcurrencyImplementa
 import { debugGenerator, timeoutExecute } from '../util';
 const debug = debugGenerator('SingleBrowserImpl');
 
-const BROWSER_TIMEOUT = 5000;
+const BROWSER_TIMEOUT = 60000;
 
 export default abstract class SingleBrowserImplementation extends ConcurrencyImplementation {
 
@@ -16,7 +16,7 @@ export default abstract class SingleBrowserImplementation extends ConcurrencyImp
     private openInstances: number = 0;
     private waitingForRepairResolvers: (() => void)[] = [];
 
-    public constructor(options: puppeteer.LaunchOptions, puppeteer: any) {
+    public constructor(options: puppeteer.BrowserOptions, puppeteer: any) {
         super(options, puppeteer);
     }
 
@@ -32,13 +32,13 @@ export default abstract class SingleBrowserImplementation extends ConcurrencyImp
 
         try {
             // will probably fail, but just in case the repair was not necessary
-            await (<puppeteer.Browser>this.browser).close();
+            await (<puppeteer.Browser>this.browser).disconnect();
         } catch (e) {
-            debug('Unable to close browser.');
+            debug('Unable to disconnect browser.');
         }
 
         try {
-            this.browser = await this.puppeteer.launch(this.options) as puppeteer.Browser;
+            this.browser = await this.puppeteer.connect(this.options) as puppeteer.Browser;
         } catch (err) {
             throw new Error('Unable to restart chrome.');
         }
@@ -49,11 +49,11 @@ export default abstract class SingleBrowserImplementation extends ConcurrencyImp
     }
 
     public async init() {
-        this.browser = await this.puppeteer.launch(this.options);
+        this.browser = await this.puppeteer.connect(this.options);
     }
 
     public async close() {
-        await (this.browser as puppeteer.Browser).close();
+        await (this.browser as puppeteer.Browser).disconnect();
     }
 
     protected abstract async createResources(): Promise<ResourceData>;
