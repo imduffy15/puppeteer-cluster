@@ -19,7 +19,7 @@ interface ClusterOptions {
     concurrency: number | ConcurrencyImplementationClassType;
     maxConcurrency: number;
     workerCreationDelay: number;
-    puppeteerOptions: LaunchOptions;
+    puppeteerOptions: () => LaunchOptions;
     monitor: boolean;
     timeout: number;
     retryLimit: number;
@@ -39,8 +39,10 @@ const DEFAULT_OPTIONS: ClusterOptions = {
     concurrency: 2, // CONTEXT
     maxConcurrency: 1,
     workerCreationDelay: 0,
-    puppeteerOptions: {
-        // headless: false, // just for testing...
+    puppeteerOptions: () => {
+        return {
+            // headless: false, // just for testing...
+        }
     },
     monitor: false,
     timeout: 30 * 1000,
@@ -141,7 +143,7 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
         try {
             await this.browser.init();
         } catch (err) {
-            throw new Error(`Unable to launch browser, error message: ${err.message}`);
+            throw new Error(`Unable to launch browser, error message: ${err.stack}`);
         }
 
         if (this.options.monitor) {
@@ -241,36 +243,6 @@ export default class Cluster<JobData = any, ReturnData = any> extends EventEmitt
 
         const url = job.getUrl();
         const domain = job.getDomain();
-
-        // Check if URL was already crawled (on skipDuplicateUrls)
-        if (this.options.skipDuplicateUrls
-            && url !== undefined && this.duplicateCheckUrls.has(url)) {
-            // already crawled, just ignore
-            debug(`Skipping duplicate URL: ${job.getUrl()}`);
-            this.work();
-            return;
-        }
-
-        // Check if the job needs to be delayed due to sameDomainDelay
-        if (this.options.sameDomainDelay !== 0 && domain !== undefined) {
-            const lastDomainAccess = this.lastDomainAccesses.get(domain);
-            if (lastDomainAccess !== undefined
-                && lastDomainAccess + this.options.sameDomainDelay > Date.now()) {
-                this.jobQueue.push(job, {
-                    delayUntil: lastDomainAccess + this.options.sameDomainDelay,
-                });
-                this.work();
-                return;
-            }
-        }
-
-        // Check are all positive, let's actually run the job
-        if (this.options.skipDuplicateUrls && url !== undefined) {
-            this.duplicateCheckUrls.add(url);
-        }
-        if (this.options.sameDomainDelay !== 0 && domain !== undefined) {
-            this.lastDomainAccesses.set(domain, Date.now());
-        }
 
         const worker = this.workersAvail.shift() as Worker<JobData, ReturnData>;
         this.workersBusy.push(worker);

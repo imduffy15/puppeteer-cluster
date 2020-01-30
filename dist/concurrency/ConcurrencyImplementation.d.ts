@@ -6,13 +6,13 @@ import { Page, LaunchOptions } from 'puppeteer';
  * One WorkerInstance per maxWorkers, one JobInstance per job
  */
 export default abstract class ConcurrencyImplementation {
-    protected options: LaunchOptions;
+    protected options: () => LaunchOptions;
     protected puppeteer: any;
     /**
      * @param options  Options that should be provided to puppeteer.launch
      * @param puppeteer  puppeteer object (like puppeteer or puppeteer-core)
      */
-    constructor(options: LaunchOptions, puppeteer: any);
+    constructor(options: () => LaunchOptions, puppeteer: any);
     /**
      * Initializes the manager
      */
@@ -59,4 +59,4 @@ export interface ResourceData {
     page: Page;
     [key: string]: any;
 }
-export declare type ConcurrencyImplementationClassType = new (options: LaunchOptions, puppeteer: any) => ConcurrencyImplementation;
+export declare type ConcurrencyImplementationClassType = new (options: () => LaunchOptions, puppeteer: any) => ConcurrencyImplementation;

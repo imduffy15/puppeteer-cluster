@@ -16,7 +16,7 @@ export default abstract class SingleBrowserImplementation extends ConcurrencyImp
     private openInstances: number = 0;
     private waitingForRepairResolvers: (() => void)[] = [];
 
-    public constructor(options: puppeteer.BrowserOptions, puppeteer: any) {
+    public constructor(options: () => puppeteer.BrowserOptions, puppeteer: any) {
         super(options, puppeteer);
     }
 
@@ -38,10 +38,10 @@ export default abstract class SingleBrowserImplementation extends ConcurrencyImp
         }
 
         try {
-            this.browser = await this.puppeteer.connect(this.options) as puppeteer.Browser;
+            this.browser = await this.puppeteer.connect(this.options()) as puppeteer.Browser;
         } catch (err) {
-            throw new Error('Unable to restart chrome.');
         }
+
         this.repairRequested = false;
         this.repairing = false;
         this.waitingForRepairResolvers.forEach(resolve => resolve());
@@ -49,7 +49,7 @@ export default abstract class SingleBrowserImplementation extends ConcurrencyImp
     }
 
     public async init() {
-        this.browser = await this.puppeteer.connect(this.options);
+        this.browser = await this.puppeteer.connect(this.options());
     }
 
     public async close() {

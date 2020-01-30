@@ -6,7 +6,7 @@ interface ClusterOptions {
     concurrency: number | ConcurrencyImplementationClassType;
     maxConcurrency: number;
     workerCreationDelay: number;
-    puppeteerOptions: LaunchOptions;
+    puppeteerOptions: () => LaunchOptions;
     monitor: boolean;
     timeout: number;
     retryLimit: number;

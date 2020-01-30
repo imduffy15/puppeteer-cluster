@@ -6,7 +6,7 @@ export default abstract class SingleBrowserImplementation extends ConcurrencyImp
     private repairRequested;
     private openInstances;
     private waitingForRepairResolvers;
-    constructor(options: puppeteer.BrowserOptions, puppeteer: any);
+    constructor(options: () => puppeteer.BrowserOptions, puppeteer: any);
     private repair;
     init(): Promise<void>;
     close(): Promise<void>;

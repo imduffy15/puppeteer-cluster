@@ -68,12 +68,8 @@ export default class Worker<JobData, ReturnData> implements WorkerOptions {
                 jobInstance = await this.browser.jobInstance();
                 page = jobInstance.resources.page;
             } catch (err) {
-                debug(`Error getting browser page (try: ${tries}), message: ${err.message}`);
+                debug(`Error getting browser page (try: ${tries}), message: ${err.stack}`);
                 await this.browser.repair();
-                tries += 1;
-                if (tries >= BROWSER_INSTANCE_TRIES) {
-                    throw new Error('Unable to get browser page');
-                }
             }
         }
 
